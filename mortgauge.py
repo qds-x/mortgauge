@@ -62,10 +62,8 @@ class InterestForecast:
         self.total_payment_count=12*self.term
         self.data={n: None for n in range(1, self.total_payment_count+1)}
 
-
     def add_data_point(self, payment, value):
         self.data[payment]=value
-
 
     def finalize(self):
         self.series=pd.Series(data=self.data).interpolate()
@@ -131,7 +129,7 @@ class MortgageSimulator:
         data=[]
         payment=1
         # We use Money.amount as a balance that shows £0.00 is not necessarily equal to Money(0, GBP)
-        while mortgage.balance.amount > 0.005 and payment < mortgage.get_total_payment_count()+1:
+        while mortgage.balance.amount > 0.004 and payment < mortgage.get_total_payment_count()+1:
             # Set defaults
             scheduled_monthly_payment=Money(0,GBP)
             total_monthly_payment=Money(0,GBP)
@@ -176,7 +174,7 @@ class MortgageSimulator:
             data.append([payment, balance, rate, total_monthly_payment, interest_payment, scheduled_principal_payment, overpayment])
             payment+=1
         self.__analyse_full_term(mortgage, data)
-        self.print_analysis()
+        self.__print_analysis()
 
     def __analyse_full_term(self, mortgage, data):
         analysis=MortgageSummary("a")
@@ -195,7 +193,7 @@ class MortgageSimulator:
         # print(analysis.aprc)
         self.df=df
 
-    def print_analysis(self):
+    def __print_analysis(self):
         print(tabulate(self.df, headers='keys', tablefmt='psql', showindex=False))
 
 MORTGAGE_TERM_YEARS=25
@@ -227,19 +225,3 @@ sim=MortgageSimulator()
 # sim.set_rate_forecast(rate_forecast)
 sim.set_overpayment_schedule(overpayment_schedule)
 sim.run(x)
-
-# pending features
-# - overpayment. Done
-# - analysis of 2 year
-# - provide custom values for interest rate. Done
-# - analysis object
-# - meta class which runs multiple simulations to compare analyses of e.g. overpayment vs non overpayment
-# Fixes
-# - last payment doesn't quite go down to 0 - why?
-# test fixed term period on mortgage is respected
-
-# SNIPPETS
-        # print(f"Total Interest Paid: {total_interest_paid}")
-        # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
-        #     print(df.to_string(index=False))
-
